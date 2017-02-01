@@ -1,0 +1,21 @@
+language: go
+sudo: false
+
+go:
+  - 1.6.4
+  - 1.7.5
+
+install:
+  - go version
+  - export GOBIN="$GOPATH/bin"
+  - export PATH="$PATH:$GOBIN"
+  - go get -u github.com/golang/lint/golint
+  - go get golang.org/x/tools/cmd/goimports
+  - gb info
+
+script:
+  - go test -v
+  - diff <(GOPATH="$PWD:$PWD/vendor" goimports -d ./src) <(printf "")
+
+after_success:
+  - diff <(golint ./src/...) <(printf "")
