@@ -10,11 +10,10 @@ Example:
 // create terminal
 term, _ := termtest.New()
 
-// run something on a terminal which is 12 characters wide and has 13 lines
-buf, _ := term.Run(12, 13, "echo XXXXXXXXXXXXX")
+buf, _ := term.Run(12, 13, "echo This is a long line that will wrap for sure")
 
-// print the output string, will print:
-// "XXXXXXXXXXXX\nX\n\n\n\n\n\n\n\n\n\n\n\n"
+// print the output string:
+// Output: "This is a lo\nng line that\n will wrap f\nor sure\n\n\n\n\n\n\n\n\n\n"
 fmt.Printf("%q\n", buf)
 
 // stop the tmux instance

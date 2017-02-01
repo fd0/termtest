@@ -85,7 +85,7 @@ func ExampleTerminal() {
 	}
 
 	// run something on a terminal which is 12 characters wide and has 13 lines
-	buf, err := term.Run(12, 13, "echo XXXXXXXXXXXXX")
+	buf, err := term.Run(12, 13, "echo This is a long line that will wrap for sure")
 	if err != nil {
 		panic(err)
 	}
@@ -99,5 +99,5 @@ func ExampleTerminal() {
 		panic(err)
 	}
 
-	// Output: "XXXXXXXXXXXX\nX\n\n\n\n\n\n\n\n\n\n\n\n"
+	// Output: "This is a lo\nng line that\n will wrap f\nor sure\n\n\n\n\n\n\n\n\n\n"
 }
