@@ -12,6 +12,7 @@ addons:
     - tmux
 
 install:
+  - tmux -V
   - go version
   - export GOBIN="$GOPATH/bin"
   - export PATH="$PATH:$GOBIN"
