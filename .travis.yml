@@ -5,6 +5,11 @@ go:
   - 1.6.4
   - 1.7.5
 
+addons:
+  apt:
+    packages:
+    - tmux
+
 install:
   - go version
   - export GOBIN="$GOPATH/bin"
