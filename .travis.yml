@@ -21,7 +21,7 @@ install:
 
 script:
   - go test -v
-  - diff <(GOPATH="$PWD:$PWD/vendor" goimports -d ./src) <(printf "")
+  - diff <(goimports -d .) <(printf "")
 
 after_success:
-  - diff <(golint ./src/...) <(printf "")
+  - diff <(golint ./...) <(printf "")
