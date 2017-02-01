@@ -10,6 +10,7 @@ Example:
 // create terminal
 term, _ := termtest.New()
 
+// run a command in a terminal with 12 columns and 13 lines
 buf, _ := term.Run(12, 13, "echo This is a long line that will wrap for sure")
 
 // print the output string:
