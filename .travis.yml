@@ -11,7 +11,6 @@ install:
   - export PATH="$PATH:$GOBIN"
   - go get -u github.com/golang/lint/golint
   - go get golang.org/x/tools/cmd/goimports
-  - gb info
 
 script:
   - go test -v
