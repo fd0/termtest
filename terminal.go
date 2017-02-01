@@ -58,7 +58,7 @@ func (term *Terminal) Run(x, y int, command string) ([]byte, error) {
 	sy := strconv.FormatInt(int64(y), 10)
 
 	// add tmux commands to run after the command we've been given
-	command = fmt.Sprintf(`%s ; tmux capture-pane -b %s ; tmux wait-for -S %s`, command, name, name)
+	command = fmt.Sprintf(`%s ; tmux capture-pane ; tmux wait-for -S %s`, command, name)
 
 	_, err := term.tmux("new-session", "-d", "-x", sx, "-y", sy, "-s", name, command)
 	if err != nil {
@@ -72,7 +72,7 @@ func (term *Terminal) Run(x, y int, command string) ([]byte, error) {
 	}
 
 	// read buffer
-	buf, err := term.tmux("show-buffer", "-b", name)
+	buf, err := term.tmux("show-buffer")
 	if err != nil {
 		return nil, err
 	}
