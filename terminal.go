@@ -1,6 +1,7 @@
 package termtest
 
 import (
+	"context"
 	"fmt"
 	"io/ioutil"
 	"math/rand"
@@ -17,7 +18,7 @@ type Terminal struct {
 }
 
 // New starts a new tmux instance running cmd with the given dimensions.
-func New() (*Terminal, error) {
+func New(ctx context.Context, env []string) (*Terminal, error) {
 	tmpdir, err := ioutil.TempDir("", "term-ui-test-")
 	if err != nil {
 		return nil, err
@@ -30,7 +31,7 @@ func New() (*Terminal, error) {
 
 	// start tmux on the given socket, then create a new detached session with
 	// the status bar disabled
-	_, err = term.tmux("new-session", "-d", ";", "set", "-g", "status", "off")
+	_, err = term.tmux(ctx, env, "new-session", "-d", ";", "set", "-g", "status", "off")
 	if err != nil {
 		return nil, err
 	}
@@ -39,18 +40,19 @@ func New() (*Terminal, error) {
 }
 
 // tmux runs tmux with arguments and returns stdout.
-func (term *Terminal) tmux(args ...string) ([]byte, error) {
+func (term *Terminal) tmux(ctx context.Context, env []string, args ...string) ([]byte, error) {
 	defaultArgs := []string{"-f", "/dev/null", "-S", term.tmuxSocket}
 	args = append(defaultArgs, args...)
 
-	cmd := exec.Command("tmux", args...)
+	cmd := exec.CommandContext(ctx, "tmux", args...)
+	cmd.Env = append(os.Environ(), env...)
 	cmd.Stderr = os.Stderr
 	return cmd.Output()
 }
 
 // Run runs the given command and returns a screen capture at the end of the
 // program, just after exit. The terminal is started with the given dimensions.
-func (term *Terminal) Run(x, y int, command string) ([]byte, error) {
+func (term *Terminal) Run(ctx context.Context, x, y int, command string) ([]byte, error) {
 	name := fmt.Sprintf("test-%d", rand.Int63())
 
 	// start new session with random name with command and given dimensions
@@ -60,19 +62,19 @@ func (term *Terminal) Run(x, y int, command string) ([]byte, error) {
 	// add tmux commands to run after the command we've been given
 	command = fmt.Sprintf(`%s ; tmux capture-pane ; tmux wait-for -S %s`, command, name)
 
-	_, err := term.tmux("new-session", "-d", "-x", sx, "-y", sy, "-s", name, command)
+	_, err := term.tmux(ctx, nil, "new-session", "-d", "-x", sx, "-y", sy, "-s", name, command)
 	if err != nil {
 		return nil, err
 	}
 
 	// wait for buffer
-	_, err = term.tmux("wait-for", name)
+	_, err = term.tmux(ctx, nil, "wait-for", name)
 	if err != nil {
 		return nil, err
 	}
 
 	// read buffer
-	buf, err := term.tmux("show-buffer")
+	buf, err := term.tmux(ctx, nil, "show-buffer")
 	if err != nil {
 		return nil, err
 	}
@@ -81,8 +83,8 @@ func (term *Terminal) Run(x, y int, command string) ([]byte, error) {
 }
 
 // Exit kills the tmux instance and all remaining processes running in it.
-func (term *Terminal) Exit() error {
-	_, err := term.tmux("kill-server")
+func (term *Terminal) Exit(ctx context.Context) error {
+	_, err := term.tmux(ctx, nil, "kill-server")
 	if err != nil {
 		return err
 	}

@@ -1,6 +1,7 @@
 package termtest_test
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
@@ -49,13 +50,16 @@ var termTests = []struct {
 }
 
 func TestTerminal(t *testing.T) {
-	term, err := termtest.New()
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	term, err := termtest.New(ctx, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	for i, test := range termTests {
-		buf, err := term.Run(test.x, test.y, test.command)
+		buf, err := term.Run(ctx, test.x, test.y, test.command)
 		if err != nil {
 			t.Errorf("test %d failed, error %v", i, err)
 			continue
@@ -72,20 +76,23 @@ func TestTerminal(t *testing.T) {
 		}
 	}
 
-	if err = term.Exit(); err != nil {
+	if err = term.Exit(ctx); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func ExampleTerminal() {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
 	// create terminal
-	term, err := termtest.New()
+	term, err := termtest.New(ctx, nil)
 	if err != nil {
 		panic(err)
 	}
 
 	// run something on a terminal which is 12 characters wide and has 13 lines
-	buf, err := term.Run(12, 13, "echo This is a long line that will wrap for sure")
+	buf, err := term.Run(ctx, 12, 13, "echo This is a long line that will wrap for sure")
 	if err != nil {
 		panic(err)
 	}
@@ -94,7 +101,7 @@ func ExampleTerminal() {
 	fmt.Printf("%q\n", buf)
 
 	// stop the tmux instance
-	err = term.Exit()
+	err = term.Exit(ctx)
 	if err != nil {
 		panic(err)
 	}
